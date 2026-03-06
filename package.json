@@ -1,0 +1,56 @@
+{
+  "name": "i18n-timezones",
+  "version": "1.0.0",
+  "description": "Timezone name translations for 36 locales. Maps ActiveSupport and IANA timezone identifiers to localized display names.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./langs/*.json": "./langs/*.json",
+    "./langs/*": "./langs/*.json"
+  },
+  "files": [
+    "dist",
+    "langs"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "flatten": "node scripts/flatten-yaml.js /home/onomojo/Work/i18n-timezones/rails/locale",
+    "generate": "node scripts/yaml-to-json.js",
+    "validate": "node scripts/validate.js",
+    "build:data": "npm run flatten && npm run validate && npm run generate",
+    "build": "tsup",
+    "test": "vitest run",
+    "prepublishOnly": "npm run build:data && npm run build"
+  },
+  "keywords": [
+    "i18n",
+    "timezone",
+    "timezones",
+    "translation",
+    "localization",
+    "internationalization",
+    "l10n",
+    "iana",
+    "activesupport"
+  ],
+  "author": "onomojo",
+  "license": "MIT",
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^2.0.0",
+    "yaml": "^2.4.0"
+  }
+}
