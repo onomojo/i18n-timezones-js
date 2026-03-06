@@ -4,10 +4,10 @@
  * Usage: node scripts/flatten-yaml.js <path-to-ruby-gem-locales>
  */
 import { readFileSync, writeFileSync, readdirSync } from 'fs';
-import { join, basename } from 'path';
-import { parse, stringify } from 'yaml';
+import { join } from 'path';
+import { parse } from 'yaml';
 
-const sourceDir = process.argv[2] || '../i18n-timezones/rails/locale';
+const sourceDir = process.argv[2] || '/home/onomojo/Work/i18n-timezones/rails/locale';
 const outDir = new URL('../data/', import.meta.url).pathname;
 
 const files = readdirSync(sourceDir).filter(f => f.endsWith('.yml'));

@@ -30,7 +30,9 @@ export function getTimezoneDisplay(
 }
 
 export function getTimezoneNames(locale: string): Record<string, string> | undefined {
-  return getLocaleData(locale);
+  const data = getLocaleData(locale);
+  if (!data) return undefined;
+  return { ...data };
 }
 
 export function getTimezoneList(

@@ -95,6 +95,56 @@ describe('getTimezoneList', () => {
   });
 });
 
+describe('getTimezoneNames', () => {
+  it('returns all timezone names for a locale', () => {
+    const names = getTimezoneNames('en');
+    expect(names).toBeDefined();
+    expect(names!['Tokyo']).toBe('Tokyo');
+    expect(Object.keys(names!).length).toBe(152);
+  });
+
+  it('returns undefined for unregistered locale', () => {
+    expect(getTimezoneNames('xx')).toBeUndefined();
+  });
+
+  it('returns a copy that does not mutate internal state', () => {
+    const names = getTimezoneNames('en')!;
+    names['Tokyo'] = 'MUTATED';
+    expect(getTimezoneNames('en')!['Tokyo']).toBe('Tokyo');
+  });
+});
+
+describe('getTimezoneDisplay edge cases', () => {
+  it('accepts IANA timezone ID', () => {
+    // Asia/Tokyo reverse-maps to "Osaka" (first-wins for duplicate IANA IDs)
+    expect(getTimezoneDisplay('Asia/Tokyo', 'en')).toBe('(GMT+09:00) Osaka');
+  });
+
+  it('formats half-hour negative offset (Newfoundland)', () => {
+    expect(getTimezoneDisplay('Newfoundland', 'en')).toBe('(GMT-03:30) Newfoundland');
+  });
+
+  it('formats 45-minute offset (Kathmandu)', () => {
+    expect(getTimezoneDisplay('Kathmandu', 'en')).toBe('(GMT+05:45) Kathmandu');
+  });
+
+  it('returns undefined for unregistered locale', () => {
+    expect(getTimezoneDisplay('Tokyo', 'xx')).toBeUndefined();
+  });
+});
+
+describe('getTimezoneList edge cases', () => {
+  it('returns undefined for unregistered locale', () => {
+    expect(getTimezoneList('xx')).toBeUndefined();
+  });
+
+  it('supports UTC offset format option', () => {
+    const list = getTimezoneList('en', { offsetFormat: 'UTC' })!;
+    const tokyo = list.find(e => e.key === 'Tokyo')!;
+    expect(tokyo.display).toBe('(UTC+09:00) Tokyo');
+  });
+});
+
 describe('mapping', () => {
   it('maps ActiveSupport name to IANA', () => {
     expect(getIanaTimezone('Tokyo')).toBe('Asia/Tokyo');

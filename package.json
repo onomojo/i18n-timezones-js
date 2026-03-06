@@ -26,7 +26,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "flatten": "node scripts/flatten-yaml.js /home/onomojo/Work/i18n-timezones/rails/locale",
+    "flatten": "node scripts/flatten-yaml.js",
     "generate": "node scripts/yaml-to-json.js",
     "validate": "node scripts/validate.js",
     "build:data": "npm run flatten && npm run validate && npm run generate",
