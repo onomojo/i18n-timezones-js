@@ -1,7 +1,7 @@
 {
   "name": "i18n-timezones",
   "version": "1.0.0",
-  "description": "Timezone name translations for 36 locales. Maps ActiveSupport and IANA timezone identifiers to localized display names.",
+  "description": "Timezone name translations for 36 locales. Maps friendly and IANA timezone identifiers to localized display names.",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -17,6 +17,7 @@
         "default": "./dist/index.cjs"
       }
     },
+    "./langs/all.json": "./langs/all.json",
     "./langs/*.json": "./langs/*.json",
     "./langs/*": "./langs/*.json"
   },
@@ -26,10 +27,9 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "flatten": "node scripts/flatten-yaml.js",
     "generate": "node scripts/yaml-to-json.js",
-    "validate": "node scripts/validate.js",
-    "build:data": "npm run flatten && npm run validate && npm run generate",
+    "generate:all": "node scripts/generate-all-locales.js",
+    "build:data": "npm run generate && npm run generate:all",
     "build": "tsup",
     "test": "vitest run",
     "prepublishOnly": "npm run build:data && npm run build"
@@ -43,7 +43,7 @@
     "internationalization",
     "l10n",
     "iana",
-    "activesupport"
+    "friendly-names"
   ],
   "author": "onomojo",
   "license": "MIT",
@@ -59,6 +59,7 @@
     "node": ">=14"
   },
   "devDependencies": {
+    "i18n-timezones-data": "github:onomojo/i18n-timezones-data",
     "tsup": "^8.0.0",
     "typescript": "^5.4.0",
     "vitest": "^2.0.0",

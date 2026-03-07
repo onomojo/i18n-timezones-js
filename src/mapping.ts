@@ -1,8 +1,8 @@
 /**
- * ActiveSupport::TimeZone::MAPPING — maps friendly names to IANA timezone IDs.
- * Source: Rails ActiveSupport (https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html)
+ * Friendly timezone name mapping — maps human-readable names to IANA timezone IDs.
+ * Source: Rails ActiveSupport TimeZone data, used here as a well-known set of friendly names.
  */
-const activeSupportToIana: Record<string, string> = {
+const friendlyNameToIana: Record<string, string> = {
   "International Date Line West": "Etc/GMT+12",
   "American Samoa": "Pacific/Pago_Pago",
   "Midway Island": "Pacific/Midway",
@@ -157,16 +157,16 @@ const activeSupportToIana: Record<string, string> = {
   "Tokelau Is.": "Pacific/Fakaofo",
 };
 
-// Build reverse mapping (IANA -> ActiveSupport name). For duplicates, first wins.
-const ianaToActiveSupport: Record<string, string> = {};
-for (const [name, iana] of Object.entries(activeSupportToIana)) {
-  if (!(iana in ianaToActiveSupport)) {
-    ianaToActiveSupport[iana] = name;
+// Build reverse mapping (IANA -> friendly name). For duplicates, first wins.
+const ianaToFriendlyName: Record<string, string> = {};
+for (const [name, iana] of Object.entries(friendlyNameToIana)) {
+  if (!(iana in ianaToFriendlyName)) {
+    ianaToFriendlyName[iana] = name;
   }
 }
 
 /**
- * UTC offsets in minutes for each ActiveSupport timezone.
+ * UTC offsets in minutes for each friendly timezone name.
  * These are the standard (non-DST) offsets.
  */
 const utcOffsets: Record<string, number> = {
@@ -324,21 +324,28 @@ const utcOffsets: Record<string, number> = {
   "Tokelau Is.": 780,
 };
 
-export function getIanaTimezone(activeSupportName: string): string | undefined {
-  return activeSupportToIana[activeSupportName];
+/** Convert a friendly timezone name to its IANA timezone ID. */
+export function getIanaTimezone(friendlyName: string): string | undefined {
+  return friendlyNameToIana[friendlyName];
 }
 
-export function getActiveSupportName(ianaId: string): string | undefined {
-  return ianaToActiveSupport[ianaId];
+/** Convert an IANA timezone ID to its friendly name. */
+export function getTimezoneFriendlyName(ianaId: string): string | undefined {
+  return ianaToFriendlyName[ianaId];
 }
 
-export function resolveToActiveSupportName(timezone: string): string | undefined {
-  if (timezone in activeSupportToIana) return timezone;
-  return ianaToActiveSupport[timezone];
+/**
+ * Resolve any timezone identifier (friendly name or IANA ID) to its friendly name.
+ * Returns undefined if not recognized.
+ */
+export function resolveToFriendlyName(timezone: string): string | undefined {
+  if (timezone in friendlyNameToIana) return timezone;
+  return ianaToFriendlyName[timezone];
 }
 
-export function getUtcOffset(activeSupportName: string): number | undefined {
-  return utcOffsets[activeSupportName];
+/** Get the standard UTC offset in minutes for a friendly timezone name. */
+export function getUtcOffset(friendlyName: string): number | undefined {
+  return utcOffsets[friendlyName];
 }
 
 export function formatOffset(minutes: number, format: 'GMT' | 'UTC' = 'GMT'): string {

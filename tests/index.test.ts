@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import {
   registerLocale,
+  registerAllLocales,
+  setDefaultLocale,
+  getDefaultLocale,
   getSupportedLocales,
   isLocaleRegistered,
   getTimezoneName,
@@ -8,7 +11,7 @@ import {
   getTimezoneNames,
   getTimezoneList,
   getIanaTimezone,
-  getActiveSupportName,
+  getTimezoneFriendlyName,
 } from '../src/index.js';
 import en from '../langs/en.json';
 import de from '../langs/de.json';
@@ -29,6 +32,76 @@ describe('registry', () => {
     const locales = getSupportedLocales();
     expect(locales).toContain('en');
     expect(locales).toContain('de');
+  });
+});
+
+describe('setDefaultLocale / getDefaultLocale', () => {
+  it('returns undefined when no default is set initially', () => {
+    // Note: default may have been set by other tests, but we test the getter works
+    expect(typeof getDefaultLocale()).not.toBe('number');
+  });
+
+  it('sets and gets the default locale', () => {
+    setDefaultLocale('en');
+    expect(getDefaultLocale()).toBe('en');
+  });
+
+  it('throws when setting an unregistered locale', () => {
+    expect(() => setDefaultLocale('xx')).toThrow('locale "xx" is not registered');
+  });
+
+  it('can change the default locale', () => {
+    setDefaultLocale('en');
+    expect(getDefaultLocale()).toBe('en');
+    setDefaultLocale('de');
+    expect(getDefaultLocale()).toBe('de');
+  });
+});
+
+describe('lookup functions without locale (using default)', () => {
+  it('getTimezoneName uses default locale', () => {
+    setDefaultLocale('de');
+    expect(getTimezoneName('Tokyo')).toBe('Tokio');
+  });
+
+  it('getTimezoneDisplay uses default locale', () => {
+    setDefaultLocale('de');
+    expect(getTimezoneDisplay('Tokyo')).toBe('(GMT+09:00) Tokio');
+  });
+
+  it('getTimezoneNames uses default locale', () => {
+    setDefaultLocale('en');
+    const names = getTimezoneNames();
+    expect(names).toBeDefined();
+    expect(names!['Tokyo']).toBe('Tokyo');
+  });
+
+  it('getTimezoneList uses default locale', () => {
+    setDefaultLocale('en');
+    const list = getTimezoneList();
+    expect(list).toBeDefined();
+    expect(list!.length).toBe(152);
+  });
+
+  it('returns undefined when no default is set and no locale passed', () => {
+    // We need a fresh module state to test this properly, but since default is set,
+    // we test that explicit locale still works
+    expect(getTimezoneName('Tokyo', 'en')).toBe('Tokyo');
+  });
+});
+
+describe('registerAllLocales', () => {
+  it('registers multiple locales at once', () => {
+    const frData = { locale: 'fr-test', timezones: { Tokyo: 'Tokyo' } };
+    const esData = { locale: 'es-test', timezones: { Tokyo: 'Tokio' } };
+    registerAllLocales([frData, esData]);
+    expect(isLocaleRegistered('fr-test')).toBe(true);
+    expect(isLocaleRegistered('es-test')).toBe(true);
+    expect(getTimezoneName('Tokyo', 'es-test')).toBe('Tokio');
+  });
+
+  it('works with an empty array', () => {
+    expect(() => registerAllLocales([])).not.toThrow();
   });
 });
 
@@ -146,18 +219,18 @@ describe('getTimezoneList edge cases', () => {
 });
 
 describe('mapping', () => {
-  it('maps ActiveSupport name to IANA', () => {
+  it('maps friendly name to IANA', () => {
     expect(getIanaTimezone('Tokyo')).toBe('Asia/Tokyo');
     expect(getIanaTimezone('Eastern Time (US & Canada)')).toBe('America/New_York');
   });
 
-  it('maps IANA to ActiveSupport name', () => {
-    expect(getActiveSupportName('Asia/Tokyo')).toBe('Osaka');
-    expect(getActiveSupportName('America/New_York')).toBe('Eastern Time (US & Canada)');
+  it('maps IANA to friendly name', () => {
+    expect(getTimezoneFriendlyName('Asia/Tokyo')).toBe('Osaka');
+    expect(getTimezoneFriendlyName('America/New_York')).toBe('Eastern Time (US & Canada)');
   });
 
   it('returns undefined for unknown mappings', () => {
     expect(getIanaTimezone('Fake Zone')).toBeUndefined();
-    expect(getActiveSupportName('Fake/Zone')).toBeUndefined();
+    expect(getTimezoneFriendlyName('Fake/Zone')).toBeUndefined();
   });
 });

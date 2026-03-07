@@ -1,20 +1,20 @@
 # i18n-timezones
 
-> Localized timezone names for JavaScript and TypeScript — 36 locales, 152 timezones, zero dependencies.
+> Localized timezone names for JavaScript and TypeScript -- 36 locales, 152 timezones, zero dependencies.
 
-Building a timezone picker for an international audience? Displaying meeting times across regions? The `Intl` API gives you raw IANA identifiers like `America/New_York`, but your users expect to see **"Eastern Time (US & Canada)"** — in their own language.
+Building a timezone picker for an international audience? Displaying meeting times across regions? The `Intl` API gives you raw IANA identifiers like `America/New_York`, but your users expect to see **"Eastern Time (US & Canada)"** -- in their own language.
 
-**i18n-timezones** provides human-friendly, localized timezone display names sourced from [CLDR](https://cldr.unicode.org/), the same data that powers ICU, Chrome, and Android. It works with both ActiveSupport timezone names (used by Rails) and IANA timezone identifiers, making it the bridge between your backend and your UI.
+**i18n-timezones** provides human-friendly, localized timezone display names sourced from [CLDR](https://cldr.unicode.org/), the same data that powers ICU, Chrome, and Android. It accepts both friendly timezone names and IANA timezone identifiers, giving you everything you need to build polished, multilingual timezone UIs.
 
 ## Why i18n-timezones?
 
-- **36 locales** covering 4+ billion speakers — from Arabic to Vietnamese
-- **Zero dependencies** — just translation data and lookup functions
-- **Tree-shakeable** — bundle only the locales you need (~3-5 KB each, gzipped)
-- **Dual ESM + CJS** — works everywhere: Vite, Webpack, Next.js, Node.js
-- **Full TypeScript** — native type declarations, not bolted on
-- **ActiveSupport + IANA** — accepts both `"Tokyo"` and `"Asia/Tokyo"`, converts between them
-- **Dropdown-ready** — `getTimezoneList()` returns entries sorted by UTC offset, perfect for `<select>` menus
+- **36 locales** covering 4+ billion speakers -- from Arabic to Vietnamese
+- **Zero dependencies** -- just translation data and lookup functions
+- **Tree-shakeable** -- bundle only the locales you need (~3-5 KB each, gzipped)
+- **Dual ESM + CJS** -- works everywhere: Vite, Webpack, Next.js, Node.js
+- **Full TypeScript** -- native type declarations, not bolted on
+- **Friendly names + IANA** -- accepts both `"Tokyo"` and `"Asia/Tokyo"`, converts between them
+- **Dropdown-ready** -- `getTimezoneList()` returns entries sorted by UTC offset, perfect for `<select>` menus
 
 ## Install
 
@@ -24,24 +24,23 @@ npm install i18n-timezones
 
 ## Quick Start
 
+The fastest way to get going -- register all locales at once and set a default:
+
 ```typescript
-import { registerLocale, getTimezoneDisplay, getTimezoneList } from 'i18n-timezones';
-import de from 'i18n-timezones/langs/de.json';
+import { registerAllLocales, setDefaultLocale, getTimezoneName } from 'i18n-timezones';
+import allLocales from 'i18n-timezones/langs/all.json';
 
-registerLocale(de);
+registerAllLocales(allLocales);
+setDefaultLocale('de');
 
-getTimezoneDisplay('Tokyo', 'de');
-// => "(GMT+09:00) Tokio"
-
-getTimezoneList('de');
-// => [{ name: "Tokyo", display: "(GMT+09:00) Tokio", offset: 540 }, ...]
+getTimezoneName('Tokyo');  // => "Tokio"
 ```
 
 ## Usage
 
-### Browser — register only what you need
+### Bundle-conscious apps -- register only what you need
 
-Each locale is a separate JSON file. Import only the ones your app requires — bundlers will tree-shake the rest.
+Each locale is a separate JSON file. Import only the ones your app requires -- bundlers will tree-shake the rest.
 
 ```typescript
 import { registerLocale, getTimezoneName, getTimezoneDisplay } from 'i18n-timezones';
@@ -56,21 +55,20 @@ getTimezoneName('Asia/Tokyo', 'fr');   // => "Tokyo" (accepts IANA IDs too)
 getTimezoneDisplay('Tokyo', 'de');     // => "(GMT+09:00) Tokio"
 ```
 
-### Node.js — register all locales at once
+### Using a default locale
+
+Set a default locale so you don't have to pass it every time:
 
 ```typescript
-import { registerLocale } from 'i18n-timezones';
-import { readdirSync, readFileSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { createRequire } from 'module';
+import { registerLocale, setDefaultLocale, getDefaultLocale, getTimezoneName } from 'i18n-timezones';
+import de from 'i18n-timezones/langs/de.json';
 
-const require_ = createRequire(import.meta.url);
-const langsDir = join(dirname(require_.resolve('i18n-timezones')), '..', 'langs');
+registerLocale(de);
+setDefaultLocale('de');
 
-for (const file of readdirSync(langsDir).filter(f => f.endsWith('.json'))) {
-  registerLocale(JSON.parse(readFileSync(join(langsDir, file), 'utf8')));
-}
+getTimezoneName('Tokyo');           // => "Tokio" (uses default locale)
+getTimezoneName('Tokyo', 'de');     // => "Tokio" (explicit locale still works)
+getDefaultLocale();                 // => "de"
 ```
 
 ### Building a timezone dropdown
@@ -84,20 +82,35 @@ registerLocale(en);
 const timezones = getTimezoneList('en');
 // Returns an array sorted by UTC offset:
 // [
-//   { name: "American Samoa",          display: "(GMT-11:00) American Samoa",          offset: -660 },
-//   { name: "International Date Line West", display: "(GMT-12:00) International Date Line West", offset: -720 },
+//   { key: "International Date Line West", iana: "Etc/GMT+12", name: "International Date Line West",
+//     display: "(GMT-12:00) International Date Line West", utcOffset: -720 },
 //   ...
-//   { name: "Auckland",                display: "(GMT+12:00) Auckland",                offset: 720 },
+//   { key: "Tokyo", iana: "Asia/Tokyo", name: "Tokyo",
+//     display: "(GMT+09:00) Tokyo", utcOffset: 540 },
+//   ...
 // ]
+
+// Use it in a React component:
+function TimezonePicker({ value, onChange }) {
+  return (
+    <select value={value} onChange={e => onChange(e.target.value)}>
+      {timezones.map(tz => (
+        <option key={tz.key} value={tz.iana ?? tz.key}>
+          {tz.display}
+        </option>
+      ))}
+    </select>
+  );
+}
 ```
 
-### Converting between ActiveSupport and IANA identifiers
+### Converting between friendly names and IANA IDs
 
 ```typescript
-import { getIanaTimezone, getActiveSupportName } from 'i18n-timezones';
+import { getIanaTimezone, getTimezoneFriendlyName } from 'i18n-timezones';
 
 getIanaTimezone('Eastern Time (US & Canada)');  // => "America/New_York"
-getActiveSupportName('Asia/Tokyo');             // => "Osaka"
+getTimezoneFriendlyName('Asia/Tokyo');          // => "Osaka"
 ```
 
 ## API Reference
@@ -105,16 +118,19 @@ getActiveSupportName('Asia/Tokyo');             // => "Osaka"
 | Function | Description |
 |----------|-------------|
 | `registerLocale(data)` | Register a locale's timezone translations. Required before lookups. |
-| `getTimezoneName(timezone, locale)` | Get the localized name. Accepts ActiveSupport or IANA identifiers. |
-| `getTimezoneDisplay(timezone, locale, options?)` | Formatted string like `"(GMT+09:00) Tokio"`. Options: `{ offsetFormat: 'GMT' \| 'UTC' }` |
-| `getTimezoneList(locale, options?)` | Sorted array of all timezones — ready for dropdowns. |
-| `getTimezoneNames(locale)` | All translations as a `{ name: localizedName }` object. |
-| `getIanaTimezone(name)` | Convert ActiveSupport name → IANA ID. |
-| `getActiveSupportName(ianaId)` | Convert IANA ID → ActiveSupport name. |
+| `registerAllLocales(allData)` | Register an array of locale data objects at once. |
+| `setDefaultLocale(locale)` | Set the default locale for lookup functions. Throws if locale is not registered. |
+| `getDefaultLocale()` | Get the current default locale, or `undefined` if none is set. |
+| `getTimezoneName(timezone, locale?)` | Get the localized name. Accepts friendly names or IANA IDs. Uses default locale if omitted. |
+| `getTimezoneDisplay(timezone, locale?, options?)` | Formatted string like `"(GMT+09:00) Tokio"`. Options: `{ offsetFormat: 'GMT' \| 'UTC' }` |
+| `getTimezoneList(locale?, options?)` | Sorted array of all timezones -- ready for dropdowns. |
+| `getTimezoneNames(locale?)` | All translations as a `{ name: localizedName }` object. |
+| `getIanaTimezone(friendlyName)` | Convert friendly name to IANA ID. |
+| `getTimezoneFriendlyName(ianaId)` | Convert IANA ID to friendly name. |
 | `getSupportedLocales()` | List all registered locale codes. |
 | `isLocaleRegistered(locale)` | Check if a locale has been registered. |
 
-All lookup functions return `undefined` when a timezone or locale is not found — no exceptions thrown.
+All lookup functions return `undefined` when a timezone or locale is not found -- no exceptions thrown.
 
 ## Supported Locales
 
@@ -131,12 +147,12 @@ All lookup functions return `undefined` when a timezone or locale is not found �
 
 ## Data Source
 
-All translations come from the [Unicode CLDR](https://cldr.unicode.org/) (Common Locale Data Repository) — the industry-standard source used by every major platform including iOS, Android, Chrome, and Java. This ensures translations are accurate, consistent, and maintained by native speakers through Unicode's established review process.
+All translations come from the [Unicode CLDR](https://cldr.unicode.org/) (Common Locale Data Repository) -- the industry-standard source used by every major platform including iOS, Android, Chrome, and Java. This ensures translations are accurate, consistent, and maintained by native speakers through Unicode's established review process.
 
 ## Related
 
-- **[i18n-country-translations](https://github.com/onomojo/i18n-country-translations-js)** — Localized country names for 168 locales
-- **[i18n-timezones-data](https://github.com/onomojo/i18n-timezones-data)** — Raw YAML translation data (for non-JS consumers)
+- **[i18n-country-translations](https://github.com/onomojo/i18n-country-translations-js)** -- Localized country names for 168 locales
+- **[i18n-timezones-data](https://github.com/onomojo/i18n-timezones-data)** -- Raw YAML translation data (for non-JS consumers)
 
 ## License
 

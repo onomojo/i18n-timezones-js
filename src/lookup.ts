@@ -1,12 +1,19 @@
 import type { TimezoneEntry, DisplayOptions } from './types.js';
-import { getLocaleData } from './registry.js';
-import { resolveToActiveSupportName, getIanaTimezone, getUtcOffset, formatOffset } from './mapping.js';
+import { getLocaleData, getDefaultLocale } from './registry.js';
+import { resolveToFriendlyName, getIanaTimezone, getUtcOffset, formatOffset } from './mapping.js';
 
-export function getTimezoneName(timezone: string, locale: string): string | undefined {
-  const data = getLocaleData(locale);
+function resolveLocale(locale?: string): string | undefined {
+  return locale ?? getDefaultLocale();
+}
+
+export function getTimezoneName(timezone: string, locale?: string): string | undefined {
+  const loc = resolveLocale(locale);
+  if (!loc) return undefined;
+
+  const data = getLocaleData(loc);
   if (!data) return undefined;
 
-  const key = resolveToActiveSupportName(timezone);
+  const key = resolveToFriendlyName(timezone);
   if (!key) return undefined;
 
   return data[key];
@@ -14,13 +21,16 @@ export function getTimezoneName(timezone: string, locale: string): string | unde
 
 export function getTimezoneDisplay(
   timezone: string,
-  locale: string,
+  locale?: string,
   options?: DisplayOptions
 ): string | undefined {
-  const key = resolveToActiveSupportName(timezone);
+  const loc = resolveLocale(locale);
+  if (!loc) return undefined;
+
+  const key = resolveToFriendlyName(timezone);
   if (!key) return undefined;
 
-  const name = getTimezoneName(key, locale);
+  const name = getTimezoneName(key, loc);
   if (!name) return undefined;
 
   const offset = getUtcOffset(key);
@@ -29,17 +39,23 @@ export function getTimezoneDisplay(
   return `(${formatOffset(offset, options?.offsetFormat ?? 'GMT')}) ${name}`;
 }
 
-export function getTimezoneNames(locale: string): Record<string, string> | undefined {
-  const data = getLocaleData(locale);
+export function getTimezoneNames(locale?: string): Record<string, string> | undefined {
+  const loc = resolveLocale(locale);
+  if (!loc) return undefined;
+
+  const data = getLocaleData(loc);
   if (!data) return undefined;
   return { ...data };
 }
 
 export function getTimezoneList(
-  locale: string,
+  locale?: string,
   options?: DisplayOptions
 ): TimezoneEntry[] | undefined {
-  const data = getLocaleData(locale);
+  const loc = resolveLocale(locale);
+  if (!loc) return undefined;
+
+  const data = getLocaleData(loc);
   if (!data) return undefined;
 
   const entries: TimezoneEntry[] = Object.entries(data).map(([key, name]) => {

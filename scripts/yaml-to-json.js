@@ -1,13 +1,15 @@
 #!/usr/bin/env node
 /**
- * Converts flattened YAML data files to JSON for the NPM package.
- * Reads from data/*.yml, writes to langs/*.json
+ * Converts YAML data files from the i18n-timezones-data package to JSON.
+ * Reads from i18n-timezones-data/data/*.yml, writes to langs/*.json
  */
 import { readFileSync, writeFileSync, readdirSync, mkdirSync } from 'fs';
 import { join, basename } from 'path';
 import { parse } from 'yaml';
+import { createRequire } from 'module';
 
-const dataDir = new URL('../data/', import.meta.url).pathname;
+const require_ = createRequire(import.meta.url);
+const dataDir = join(require_.resolve('i18n-timezones-data/package.json'), '..', 'data');
 const outDir = new URL('../langs/', import.meta.url).pathname;
 mkdirSync(outDir, { recursive: true });
 
