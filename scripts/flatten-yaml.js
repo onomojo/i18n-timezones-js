@@ -3,12 +3,17 @@
  * Reads the Ruby gem's YAML locale files and produces flattened YAML in data/
  * Usage: node scripts/flatten-yaml.js <path-to-ruby-gem-locales>
  */
-import { readFileSync, writeFileSync, readdirSync } from 'fs';
+import { readFileSync, writeFileSync, readdirSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { parse } from 'yaml';
 
-const sourceDir = process.argv[2] || '/home/onomojo/Work/i18n-timezones/rails/locale';
+const sourceDir = process.argv[2];
+if (!sourceDir) {
+  console.error('Usage: node scripts/flatten-yaml.js <path-to-ruby-gem-locales>');
+  process.exit(1);
+}
 const outDir = new URL('../data/', import.meta.url).pathname;
+mkdirSync(outDir, { recursive: true });
 
 const files = readdirSync(sourceDir).filter(f => f.endsWith('.yml'));
 

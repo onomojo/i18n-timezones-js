@@ -28,13 +28,16 @@ getTimezoneList('de');                    // sorted array for dropdowns
 
 ```typescript
 import { registerLocale, getTimezoneName } from 'i18n-timezones';
-import fs from 'fs';
-import path from 'path';
+import { readdirSync, readFileSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
 
 // Register all locales from the langs directory
-const langsDir = path.join(require.resolve('i18n-timezones'), '..', '..', 'langs');
-for (const file of fs.readdirSync(langsDir).filter(f => f.endsWith('.json'))) {
-  registerLocale(JSON.parse(fs.readFileSync(path.join(langsDir, file), 'utf8')));
+const require_ = createRequire(import.meta.url);
+const langsDir = join(dirname(require_.resolve('i18n-timezones')), '..', 'langs');
+for (const file of readdirSync(langsDir).filter(f => f.endsWith('.json'))) {
+  registerLocale(JSON.parse(readFileSync(join(langsDir, file), 'utf8')));
 }
 ```
 

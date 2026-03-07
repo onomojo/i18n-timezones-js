@@ -3,12 +3,13 @@
  * Converts flattened YAML data files to JSON for the NPM package.
  * Reads from data/*.yml, writes to langs/*.json
  */
-import { readFileSync, writeFileSync, readdirSync } from 'fs';
+import { readFileSync, writeFileSync, readdirSync, mkdirSync } from 'fs';
 import { join, basename } from 'path';
 import { parse } from 'yaml';
 
 const dataDir = new URL('../data/', import.meta.url).pathname;
 const outDir = new URL('../langs/', import.meta.url).pathname;
+mkdirSync(outDir, { recursive: true });
 
 const files = readdirSync(dataDir).filter(f => f.endsWith('.yml'));
 
