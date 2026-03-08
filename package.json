@@ -23,9 +23,6 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "generate": "node scripts/yaml-to-json.js",
-    "generate:all": "node scripts/generate-all-locales.js",
-    "build:data": "npm run generate && npm run generate:all",
     "build": "tsup",
     "test": "vitest run",
     "prepublishOnly": "npm run build"
