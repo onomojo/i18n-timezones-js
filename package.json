@@ -1,6 +1,6 @@
 {
   "name": "i18n-timezones",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Timezone name translations for 36 locales. Maps friendly and IANA timezone identifiers to localized display names.",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -16,14 +16,10 @@
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       }
-    },
-    "./langs/all.json": "./langs/all.json",
-    "./langs/*.json": "./langs/*.json",
-    "./langs/*": "./langs/*.json"
+    }
   },
   "files": [
-    "dist",
-    "langs"
+    "dist"
   ],
   "sideEffects": false,
   "scripts": {
@@ -32,7 +28,7 @@
     "build:data": "npm run generate && npm run generate:all",
     "build": "tsup",
     "test": "vitest run",
-    "prepublishOnly": "npm run build:data && npm run build"
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "i18n",
@@ -58,8 +54,10 @@
   "engines": {
     "node": ">=14"
   },
+  "dependencies": {
+    "i18n-timezones-data": "^1.1.0"
+  },
   "devDependencies": {
-    "i18n-timezones-data": "^1.1.0",
     "tsup": "^8.0.0",
     "typescript": "^5.4.0",
     "vitest": "^2.0.0"

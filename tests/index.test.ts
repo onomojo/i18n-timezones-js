@@ -6,6 +6,8 @@ import {
   getDefaultLocale,
   getSupportedLocales,
   isLocaleRegistered,
+  loadLocale,
+  loadAllLocales,
   getTimezoneName,
   getTimezoneDisplay,
   getTimezoneNames,
@@ -13,12 +15,10 @@ import {
   getIanaTimezone,
   getTimezoneFriendlyName,
 } from '../src/index.js';
-import en from '../langs/en.json';
-import de from '../langs/de.json';
 
 beforeAll(() => {
-  registerLocale(en);
-  registerLocale(de);
+  loadLocale('en');
+  loadLocale('de');
 });
 
 describe('registry', () => {
@@ -102,6 +102,19 @@ describe('registerAllLocales', () => {
 
   it('works with an empty array', () => {
     expect(() => registerAllLocales([])).not.toThrow();
+  });
+});
+
+describe('loadLocale / loadAllLocales', () => {
+  it('loads a locale from the data package', () => {
+    loadLocale('fr');
+    expect(isLocaleRegistered('fr')).toBe(true);
+    expect(getTimezoneName('Tokyo', 'fr')).toBeDefined();
+  });
+
+  it('loads all locales from the data package', () => {
+    loadAllLocales();
+    expect(getSupportedLocales().length).toBeGreaterThanOrEqual(36);
   });
 });
 
