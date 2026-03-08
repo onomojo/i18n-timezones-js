@@ -1,5 +1,4 @@
-import { createRequire } from 'module';
-import { join, basename } from 'path';
+import { join, basename, dirname } from 'path';
 import { readdirSync, readFileSync } from 'fs';
 import type { LocaleData } from './types.js';
 
@@ -7,8 +6,9 @@ const locales = new Map<string, Record<string, string>>();
 let defaultLocale: string | undefined;
 
 function resolveDataDir(): string {
-  const require_ = createRequire(import.meta.url);
-  return join(require_.resolve('i18n-timezones-data/package.json'), '..', 'data');
+  // Works in both ESM and CJS contexts
+  const pkgPath = require.resolve('i18n-timezones-data/package.json');
+  return join(dirname(pkgPath), 'data');
 }
 
 /** Load a single locale from the i18n-timezones-data package and register it. */
@@ -23,7 +23,7 @@ export function loadLocale(locale: string): void {
 /** Load all available locales from the i18n-timezones-data package. */
 export function loadAllLocales(): void {
   const dataDir = resolveDataDir();
-  const files = readdirSync(dataDir).filter(f => f.endsWith('.json'));
+  const files = readdirSync(dataDir).filter((f: string) => f.endsWith('.json'));
   for (const file of files) {
     const locale = basename(file, '.json');
     const raw = readFileSync(join(dataDir, file), 'utf8');
