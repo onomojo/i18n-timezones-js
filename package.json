@@ -59,7 +59,7 @@
     "node": ">=14"
   },
   "devDependencies": {
-    "i18n-timezones-data": "github:onomojo/i18n-timezones-data",
+    "i18n-timezones-data": "github:onomojo/i18n-timezones-data#v1.1.0",
     "tsup": "^8.0.0",
     "typescript": "^5.4.0",
     "vitest": "^2.0.0"
