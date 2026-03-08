@@ -1,6 +1,6 @@
 {
   "name": "i18n-timezones",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Timezone name translations for 36 locales. Maps friendly and IANA timezone identifiers to localized display names.",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -62,7 +62,6 @@
     "i18n-timezones-data": "github:onomojo/i18n-timezones-data",
     "tsup": "^8.0.0",
     "typescript": "^5.4.0",
-    "vitest": "^2.0.0",
-    "yaml": "^2.4.0"
+    "vitest": "^2.0.0"
   }
 }

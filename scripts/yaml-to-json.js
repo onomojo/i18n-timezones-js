@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 /**
- * Converts YAML data files from the i18n-timezones-data package to JSON.
- * Reads from i18n-timezones-data/data/*.yml, writes to langs/*.json
+ * Copies JSON data files from the i18n-timezones-data package to langs/.
+ * Reads from i18n-timezones-data/data/*.json, writes to langs/*.json
  */
 import { readFileSync, writeFileSync, readdirSync, mkdirSync } from 'fs';
 import { join, basename } from 'path';
-import { parse } from 'yaml';
 import { createRequire } from 'module';
 
 const require_ = createRequire(import.meta.url);
@@ -13,12 +12,12 @@ const dataDir = join(require_.resolve('i18n-timezones-data/package.json'), '..',
 const outDir = new URL('../langs/', import.meta.url).pathname;
 mkdirSync(outDir, { recursive: true });
 
-const files = readdirSync(dataDir).filter(f => f.endsWith('.yml'));
+const files = readdirSync(dataDir).filter(f => f.endsWith('.json'));
 
 for (const file of files) {
   const raw = readFileSync(join(dataDir, file), 'utf8');
-  const parsed = parse(raw);
-  const locale = basename(file, '.yml');
+  const parsed = JSON.parse(raw);
+  const locale = basename(file, '.json');
 
   const jsonData = { locale, timezones: parsed };
   writeFileSync(
